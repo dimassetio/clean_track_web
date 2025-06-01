@@ -1,11 +1,11 @@
 import { collection, doc, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot, QuerySnapshot, DocumentData, CollectionReference } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 
 class FirestoreService<T> {
   private baseCollection: CollectionReference;
 
   constructor(...pathSegments: string[]) {
-    this.baseCollection = collection(firestore, ...(pathSegments as [string, ...string[]]));
+    this.baseCollection = collection(db, ...(pathSegments as [string, ...string[]]));
   }
 
   // Get a single document by ID
