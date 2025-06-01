@@ -35,9 +35,8 @@ export default function TaskManagementPage() {
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !loading) {
       redirect('/login');
-
       return;
     }
 
