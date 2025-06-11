@@ -16,6 +16,7 @@ interface OfficerTaskSummary {
   completed: number;
   inProcess: number;
   lastCompletedAt: Timestamp | null;
+  lastArea: String;
 }
 
 export default function TaskManagementPage() {
@@ -76,11 +77,12 @@ export default function TaskManagementPage() {
 
         // Get last completed task
         const completedTasks = tasks
-          .filter(t => t.STATUS === 'DINE' && t.DONE_AT)
+          .filter(t => t.STATUS === 'Done' && t.DONE_AT)
           .sort((a, b) => b.DONE_AT.seconds - a.DONE_AT.seconds);
 
+        // const lastCompletedTask = completedTasks.length > 0 ?  completedTasks[0] : null;
         const lastCompletedAt = completedTasks.length > 0 ? completedTasks[0].DONE_AT : null;
-
+        const lastArea = completedTasks.length > 0 ? completedTasks[0].AREA : '-';
         results.push({
           userId,
           name,
@@ -88,6 +90,7 @@ export default function TaskManagementPage() {
           completed,
           inProcess,
           lastCompletedAt,
+          lastArea,
         });
       }
 
@@ -101,55 +104,56 @@ export default function TaskManagementPage() {
   if (loading || loadingData) return <Loading />;
 
   return (
-    <DashboardLayout>
-      <div className="p-4 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Task Management</h2>
-        <table className="min-w-full table-auto border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2 text-left">Officer Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-right">Total Tasks Today</th>
-              <th className="border border-gray-300 px-4 py-2 text-right">Completed Tasks</th>
-              <th className="border border-gray-300 px-4 py-2 text-right">Tasks In Process</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Last Completed Task</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Action</th>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-semibold mb-4">Task Management</h2>
+      <table className="min-w-full table-auto border-collapse border border-gray-200">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 px-4 py-2 text-left">Officer Name</th>
+            <th className="border border-gray-300 px-4 py-2 text-right">Last Area</th>
+            <th className="border border-gray-300 px-4 py-2 text-right">Total Tasks Today</th>
+            <th className="border border-gray-300 px-4 py-2 text-right">Completed Tasks</th>
+            <th className="border border-gray-300 px-4 py-2 text-right">Tasks In Process</th>
+            <th className="border border-gray-300 px-4 py-2 text-left">Last Completed Task</th>
+            <th className="border border-gray-300 px-4 py-2 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.length === 0 && (
+            <tr>
+              <td colSpan={5} className="text-center p-4 text-gray-500">
+                No officers found or no tasks available today.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {data.length === 0 && (
-              <tr>
-                <td colSpan={5} className="text-center p-4 text-gray-500">
-                  No officers found or no tasks available today.
-                </td>
-              </tr>
-            )}
-            {data.map((officer) => (
-              <tr key={officer.userId} className="hover:bg-gray-50">
-                <td className="border border-gray-300 px-4 py-2">{officer.name}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{officer.totalToday}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{officer.completed}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{officer.inProcess}</td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {officer.lastCompletedAt
-                    ? new Date(officer.lastCompletedAt.seconds * 1000).toLocaleString()
-                    : '-'}
-                </td>
-                <td className="px-6 py-4">
-                  <button
-                    onClick={() => openAssignTaskModal(officer)}
-                    className="bg-primary-3 hover:bg-primary-4 text-white px-3 py-1 rounded-md text-sm"
-                  >
-                    Add Task
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {selectedOfficer && (
-          <AddTaskModal officer={selectedOfficer} onClose={closeAssignTaskModal} />
-        )}
-      </div>
-    </DashboardLayout>
+          )}
+          {data.map((officer) => (
+            <tr key={officer.userId} className="hover:bg-gray-50">
+              <td className="border border-gray-300 px-4 py-2">{officer.name}</td>
+              <td className="border border-gray-300 px-4 py-2">{officer.lastArea}</td>
+              <td className="border border-gray-300 px-4 py-2 text-right">{officer.totalToday}</td>
+              <td className="border border-gray-300 px-4 py-2 text-right">{officer.completed}</td>
+              <td className="border border-gray-300 px-4 py-2 text-right">{officer.inProcess}</td>
+              <td className="border border-gray-300 px-4 py-2">
+                {officer.lastCompletedAt
+                  ? new Date(officer.lastCompletedAt.seconds * 1000).toLocaleString()
+                  : '-'}
+              </td>
+              <td className="px-6 py-4">
+                <button
+                  onClick={() => openAssignTaskModal(officer)}
+                  className="bg-primary-3 hover:bg-primary-4 text-white px-3 py-1 rounded-md text-sm"
+                >
+                  Add Task
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {selectedOfficer && (
+        <AddTaskModal officer={selectedOfficer} onClose={closeAssignTaskModal} />
+      )}
+    </div>
+
   );
 }

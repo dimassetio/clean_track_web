@@ -33,7 +33,7 @@ export default function UserMenu() {
   // Sign Out function
   const handleSignOut = async () => {
     await signOut(auth);
-    router.push('/login');
+    router.replace('/login');
   };
 
   return (

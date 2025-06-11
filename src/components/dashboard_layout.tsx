@@ -1,4 +1,3 @@
-// app/dashboard-layout.tsx
 "use client";
 
 import { useAuth } from '@/lib/auth-context';
@@ -10,6 +9,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserMenu from './user_menu';
 import Link from 'next/link';
+import Sidebar from './sidebar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -45,49 +45,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </h1>
         </div>
         <hr className="border-t-2 border-gray-300 m-4" />
-        <nav>
-          <ul>
-            <li className="p-3 hover:bg-primary-1 cursor-pointer flex gap-2 items-center mx-4 my-2 rounded-lg bg-primary-1 text-primary-3">
-              <div className="p-2 rounded-md hover:bg-primary-2 bg-primary-1">
-                <MdDashboard size={24} />
-              </div>
-              {!isSidebarCollapsed && 'Dashboard'}
-            </li>
-            <li className="p-3 hover:bg-primary-1 cursor-pointer flex gap-2 items-center mx-4 my-2 rounded-lg">
-              <div className="p-2 rounded-md hover:bg-primary-2 bg-primary-1">
-                <MdReport size={24} />
-              </div>
-              {!isSidebarCollapsed && 'Reports'}
-            </li>
-            <Link href="/task-management" passHref>
-              <li className="p-3 hover:bg-primary-1 cursor-pointer flex gap-2 items-center mx-4 my-2 rounded-lg">
-                <div className="p-2 rounded-md hover:bg-primary-2 bg-primary-1">
-                  <MdTask size={24} />
-                </div>
-                {!isSidebarCollapsed && 'Task Management'}
-              </li>
-            </Link>
-            <li className="p-3 hover:bg-primary-1 cursor-pointer flex gap-2 items-center mx-4 my-2 rounded-lg">
-              <div className="p-2 rounded-md hover:bg-primary-2 bg-primary-1">
-                <MdAnalytics size={24} />
-              </div>
-              {!isSidebarCollapsed && 'Analytics'}
-            </li>
-            <li className="p-3 hover:bg-primary-1 cursor-pointer flex gap-2 items-center mx-4 my-2 rounded-lg">
-              <div className="p-2 rounded-md hover:bg-primary-2 bg-primary-1">
-                <MdPerson size={24} />
-              </div>
-              {!isSidebarCollapsed && 'Profile'}
-            </li>
-            <li className="p-3 hover:bg-primary-1 cursor-pointer flex gap-2 items-center mx-4 my-2 rounded-lg">
-              <div className="p-2 rounded-md hover:bg-primary-2 bg-primary-1">
-                <MdLogout size={24} />
-              </div>
-              {!isSidebarCollapsed && 'Sign Out'}
-            </li>
-          </ul>
-
-        </nav>
+        <Sidebar isSidebarCollapsed={isSidebarCollapsed} />
       </aside>
 
       {/* Main Content Area */}

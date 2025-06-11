@@ -6,6 +6,7 @@ export interface UserType {
   role?: string;      // User role
   email?: string;     // Email address
   name?: string;      // Name
+  phone?: string;      // Name
   foto?: string;       // User Photo
 }
 
@@ -14,6 +15,7 @@ export function toFirestoreUser(user: UserType): Record<string, any> {
   return {
     NAME: user.name,
     EMAIL: user.email,
+    PHONE: user.phone,
     ROLE: user.role,
     FOTO: user.foto,
   };
@@ -26,6 +28,7 @@ export function fromFirestoreUser(snapshot: DocumentSnapshot<any>): UserType {
     id: snapshot.id,
     name: data.NAME,
     email: data.EMAIL,
+    phone: data.PHONE,
     role: data.ROLE,
     foto: data.FOTO,
   };
