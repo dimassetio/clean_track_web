@@ -160,7 +160,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
               <div className="flex items-center gap-3 text-gray-700">
                 <FaStickyNote className="w-4 h-4 text-primary-3" />
                 <div>
-                  <p className="font-medium text-gray-500 text-sm">Cleaner's Note</p>
+                  <p className="font-medium text-gray-500 text-sm">{`Cleaner's Note`}</p>
                   <p className="text-gray-800">{report.officerNote}</p>
                 </div>
               </div>
@@ -179,7 +179,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
               className="object-cover"
             />
             <div className="absolute top-2 right-2 bg-white/80 text-sm text-gray-700 px-3 py-1 rounded-full shadow">
-              Reporter's Photo
+              {`Reporter's Photo`}
             </div>
           </div>
 
@@ -208,7 +208,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
                 className="object-cover"
               />
               <div className="absolute top-2 right-2 bg-white/80 text-sm text-gray-700 px-3 py-1 rounded-full shadow">
-                Officer's Initial Photo
+                {`Officer's Initial Photo`}
               </div>
             </div>}
 

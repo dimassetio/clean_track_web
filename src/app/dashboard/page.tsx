@@ -1,15 +1,12 @@
 'use client';
 
 import Loading, { LoadingSpinner } from "@/components/loading";
-import { Filters } from "@/components/reports/filter_bar";
-import ReportsTable from "@/components/reports/reports_table";
-import useReports from "@/hooks/use_reports";
 import { getGroupedReportCounts, getLatestReports } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { ReportType } from "@/types/report_type";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaFileAlt, FaSpinner, FaCheckCircle, FaBell, FaHourglassHalf, FaCheck, FaTimes } from "react-icons/fa";
+import { FaSpinner, FaCheckCircle, FaBell, FaHourglassHalf, FaCheck, FaTimes } from "react-icons/fa";
 
 export default function Home() {
   const { user, userType, loading } = useAuth()
@@ -71,7 +68,7 @@ export default function Home() {
           <h1 className="font-bold text-xl">
             Welcome, {userType?.name}!
           </h1>
-          <p className="text-gray-600 font-medium">Here's an overview of your reports and tasks </p>
+          <p className="text-gray-600 font-medium">{`Here's an overview of your reports and tasks`} </p>
         </div>
       </div>
 

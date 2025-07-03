@@ -6,24 +6,28 @@ import React, { useState, useEffect } from 'react';
 
 interface Props {
   initialData?: UserType;
-  onSubmit: (data: UserType) => void;
+  onSubmit: (data: UserType & { password?: string, email?: string }) => Promise<void>;
   isLoading: boolean;
 }
 
 const UserForm: React.FC<Props> = ({ initialData, onSubmit, isLoading }) => {
-  const [form, setForm] = useState<UserType>({
+  const [form, setForm] = useState<UserType & { password?: string }>({
     name: '',
     email: '',
     phone: '',
     role: '',
     foto: '',
+    password: '',
   });
 
   useEffect(() => {
-    if (initialData) setForm(initialData);
+    if (initialData) {
+      setForm({
+        ...initialData,
+        password: '', // do not populate password on edit
+      });
+    }
   }, [initialData]);
-
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,7 +35,14 @@ const UserForm: React.FC<Props> = ({ initialData, onSubmit, isLoading }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(form);
+
+    // if editing, remove password so we don't accidentally send empty password
+    if (initialData) {
+      const { password, ...rest } = form;
+      onSubmit(rest);
+    } else {
+      onSubmit(form);
+    }
   };
 
   return (
@@ -74,8 +85,24 @@ const UserForm: React.FC<Props> = ({ initialData, onSubmit, isLoading }) => {
         <option value="Administrator">Administrator</option>
       </select>
 
-      <button type="submit" className={`${isLoading ? 'bg-gray-200' : 'bg-primary-3'} text-white px-4 py-2 rounded`}>
-        {isLoading ? <LoadingSpinner /> : form.id ? 'Update User' : 'Add User'}
+      {/* Only show password field when adding */}
+      {!initialData && (
+        <input
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          placeholder="Password"
+          className="w-full border px-3 py-2 rounded"
+          required
+        />
+      )}
+
+      <button
+        type="submit"
+        className={`${isLoading ? 'bg-gray-200' : 'bg-primary-3'} text-white px-4 py-2 rounded`}
+      >
+        {isLoading ? <LoadingSpinner /> : initialData ? 'Update User' : 'Add User'}
       </button>
     </form>
   );

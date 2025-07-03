@@ -1,8 +1,9 @@
-import { collection, deleteDoc, doc, getCountFromServer, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getCountFromServer, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { ReportType } from "@/types/report_type";
 import { UserType, fromFirestoreUser, toFirestoreUser } from "@/types/user_type";
 import { sendPasswordResetEmail } from "firebase/auth";
+
 
 export async function getReportDetail(id: string) {
   const docRef = doc(db, "reports", id); // ✅ modular syntax
@@ -75,6 +76,35 @@ export async function updateUserDetail(id: string, data: UserType) {
     return false;
   }
 }
+
+export async function addUser(data: UserType) {
+  try {
+    const docRef = await addDoc(collection(db, "users"), toFirestoreUser(data));
+    return docRef.id; // returns the auto-generated ID
+  } catch (error) {
+    console.error("Error adding user:", error);
+    return null;
+  }
+}
+
+// export async function createUserServer(email: string, password: string, data: UserType) {
+//   try {
+//     // 1. Create user in Firebase Authentication via Admin SDK
+//     const userRecord = await adminAuth.createUser({
+//       email,
+//       password,
+//     });
+//     const uid = userRecord.uid;
+
+//     // 2. Create Firestore document with same UID
+//     await setDoc(doc(db, "users", uid), toFirestoreUser(data));
+
+//     return { success: true, uid };
+//   } catch (error) {
+//     console.error("Error creating user on server:", error);
+//     return { success: false, error };
+//   }
+// }
 
 export async function deleteUser(id: string) {
   try {
