@@ -5,6 +5,8 @@ import { useReportAnalytics } from "@/hooks/use_analytics";
 import { useState } from "react";
 import { FaCheckCircle, FaClock, FaMapMarkedAlt, FaRegFileAlt, FaSpinner, FaUserCheck } from "react-icons/fa";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function AnalyticsPage() {
   const [filters, setFilters] = useState({
@@ -18,17 +20,60 @@ export default function AnalyticsPage() {
 
   const selectedData = areaAnalyticsMap[selectedArea];
 
-  function exportAnalyticsToExcel() {
+  // function exportAnalyticsToExcel(format?: string) {
+  //   const rows = Object.entries(areaAnalyticsMap)
+  //     .filter(([area]) => area !== "")
+  //     .map(([area, stats]) => ({
+  //       Area: area,
+  //       "Total Task": stats.totalReports,
+  //       "Completion Rate (%)": stats.completionRate,
+  //       "Average Duration (mins)": stats.avgTaskDuration,
+  //       "Assigned Cleaners": Object.values(stats.activeCleaners).join(", "),
+  //     }));
+
+  //   const worksheet = XLSX.utils.json_to_sheet(rows);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Analytics");
+
+  //   XLSX.writeFile(workbook, "analytics-report.xlsx");
+  // }
+  function exportAnalyticsToExcel(format?: string) {
     const rows = Object.entries(areaAnalyticsMap)
       .filter(([area]) => area !== "")
       .map(([area, stats]) => ({
         Area: area,
-        "Total Task": stats.totalReports,
-        "Completion Rate (%)": stats.completionRate,
-        "Average Duration (mins)": stats.avgTaskDuration,
-        "Assigned Cleaners": Object.values(stats.activeCleaners).join(", "),
+        TotalTask: stats.totalReports,
+        CompletionRate: stats.completionRate,
+        AvgDuration: stats.avgTaskDuration,
+        Cleaners: Object.values(stats.activeCleaners).join(", "),
       }));
 
+    if (format === "pdf") {
+      if (!rows.length) {
+        alert("No data to export to PDF.");
+        return;
+      }
+
+      const doc = new jsPDF();
+
+      autoTable(doc, {
+        head: [["Area", "Total Task", "Completion Rate (%)", "Avg Duration (mins)", "Cleaners"]],
+        body: rows.map((row) => [
+          row.Area,
+          row.TotalTask,
+          row.CompletionRate,
+          row.AvgDuration,
+          row.Cleaners,
+        ]),
+        styles: { fontSize: 8 },
+        margin: { top: 20 },
+      });
+
+      doc.save("analytics-report.pdf");
+      return;
+    }
+
+    // Excel export (unchanged)
     const worksheet = XLSX.utils.json_to_sheet(rows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Analytics");
@@ -50,7 +95,7 @@ export default function AnalyticsPage() {
       }
       onAreaChange={(data) => setSelectedArea(data.area)}
       onPeriodChange={(data) => setFilters(data)}
-      onExport={() => exportAnalyticsToExcel()}
+      onExport={(format) => exportAnalyticsToExcel(format)}
     />
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
       {/* Total Reports */}

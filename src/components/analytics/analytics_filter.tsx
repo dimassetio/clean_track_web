@@ -13,7 +13,7 @@ type AnalyticsFilterProps = {
   filters: AnalyticsFilters;
   onAreaChange: (filters: { area: string }) => void;
   onPeriodChange: (filters: { startDate: Date; endDate: Date }) => void;
-  onExport: () => void;
+  onExport: (format?: string) => void;
 };
 
 export default function AnalyticsFilterBar({
@@ -70,12 +70,21 @@ export default function AnalyticsFilterBar({
       </div>
 
       {/* Export Button */}
-      <button
-        onClick={onExport}
-        className="bg-green-600 text-white px-4 py-2 h-10 rounded-md hover:bg-green-700 transition"
-      >
-        Export to Excel
-      </button>
+      <div className="flex gap-4">
+
+        <button
+          onClick={() => onExport('pdf')}
+          className="bg-green-600 text-white px-4 py-2 h-10 rounded-md hover:bg-green-700 transition"
+        >
+          Export to PDF
+        </button>
+        <button
+          onClick={() => onExport('excel')}
+          className="bg-green-600 text-white px-4 py-2 h-10 rounded-md hover:bg-green-700 transition"
+        >
+          Export to Excel
+        </button>
+      </div>
     </div>
   );
 }
