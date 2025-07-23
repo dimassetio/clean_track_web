@@ -17,6 +17,9 @@ interface OfficerTaskSummary {
   inProcess: number;
   lastCompletedAt: Timestamp | null;
   lastArea: String;
+  area: String;
+  lat: number | null;
+  lng: number | null;
 }
 
 export default function TaskManagementPage() {
@@ -30,9 +33,11 @@ export default function TaskManagementPage() {
     setSelectedOfficer(user);
   };
 
-  const closeAssignTaskModal = () => {
+  const closeAssignTaskModal = (shouldReload = false) => {
     setSelectedOfficer(null);
-    window.location.reload();
+    if (shouldReload) {
+      window.location.reload();
+    }
   };
 
   useEffect(() => {
@@ -58,6 +63,9 @@ export default function TaskManagementPage() {
       for (const userDoc of userSnap.docs) {
         const userId = userDoc.id;
         const name = userDoc.data().NAME || '-';
+        const area = userDoc.data().AREA || '-';
+        const lat = userDoc.data().LAT || null;
+        const lng = userDoc.data().LNG || null;
 
         // Query tasks for this user created today
         const tasksQuery = query(
@@ -91,6 +99,9 @@ export default function TaskManagementPage() {
           inProcess,
           lastCompletedAt,
           lastArea,
+          area,
+          lat,
+          lng,
         });
       }
 
@@ -110,7 +121,7 @@ export default function TaskManagementPage() {
         <thead>
           <tr className="bg-gray-100">
             <th className="border border-gray-300 px-4 py-2 text-left">Officer Name</th>
-            <th className="border border-gray-300 px-4 py-2 text-right">Last Area</th>
+            <th className="border border-gray-300 px-4 py-2 text-right">Area</th>
             <th className="border border-gray-300 px-4 py-2 text-right">Total Tasks Today</th>
             <th className="border border-gray-300 px-4 py-2 text-right">Completed Tasks</th>
             <th className="border border-gray-300 px-4 py-2 text-right">Tasks In Process</th>
@@ -129,7 +140,7 @@ export default function TaskManagementPage() {
           {data.map((officer) => (
             <tr key={officer.userId} className="hover:bg-gray-50">
               <td className="border border-gray-300 px-4 py-2">{officer.name}</td>
-              <td className="border border-gray-300 px-4 py-2">{officer.lastArea}</td>
+              <td className="border border-gray-300 px-4 py-2">{officer.area}</td>
               <td className="border border-gray-300 px-4 py-2 text-right">{officer.totalToday}</td>
               <td className="border border-gray-300 px-4 py-2 text-right">{officer.completed}</td>
               <td className="border border-gray-300 px-4 py-2 text-right">{officer.inProcess}</td>

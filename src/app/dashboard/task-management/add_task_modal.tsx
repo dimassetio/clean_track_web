@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { getDocs, collection, query, where, updateDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { ReportType, fromFirestoreReport } from "@/types/report_type"; // make sure to define this interface
+import { getDistanceInKm } from "@/helpers/formatter";
 
 export default function AddTaskModal({ officer, onClose }: {
   officer: any,
-  onClose: () => void
+  onClose: (shouldReload?: boolean) => void,
 }) {
   const [reports, setReports] = useState<ReportType[]>([]);
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
@@ -34,7 +35,7 @@ export default function AddTaskModal({ officer, onClose }: {
       OFFICER_NAME: officer.name,
       ASSIGNED_AT: new Date(),
     });
-    onClose();
+    onClose(true);
   };
 
   return (
@@ -77,9 +78,11 @@ export default function AddTaskModal({ officer, onClose }: {
                       hour12: false,
                     }) : ""}
                   </p>
-                  {/* <p className="text-xs text-gray-400 italic truncate max-w-xs">
-                  {address}
-                </p> */}
+                  <p className="text-xs text-gray-400 italic truncate max-w-xs">
+                    {report.area} | {getDistanceInKm(report.reporterLocation?.latitude ?? 0, report.reporterLocation?.longitude ?? 0,
+                      officer.lat, officer.lng
+                    )} Km
+                  </p>
                 </div>
               </div>
             ))}
@@ -87,7 +90,7 @@ export default function AddTaskModal({ officer, onClose }: {
         )}
 
         <div className="flex justify-between mt-6">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
+          <button onClick={() => onClose(false)} className="px-4 py-2 bg-gray-300 rounded">
             Cancel
           </button>
           <button

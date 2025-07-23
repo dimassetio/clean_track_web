@@ -8,6 +8,9 @@ export interface UserType {
   name?: string;      // Name
   phone?: string;      // Name
   foto?: string;       // User Photo
+  lat?: number;       // User Photo
+  lng?: number;       // User Photo
+  area?: string;       // User Photo
 }
 
 // Convert a User object to Firestore-compatible format
@@ -18,6 +21,9 @@ export function toFirestoreUser(user: UserType): Record<string, any> {
     PHONE: user.phone,
     ROLE: user.role,
     FOTO: user.foto,
+    LAT: user.lat,
+    LNG: user.lng,
+    AREA: user.area,
   };
 }
 
@@ -31,5 +37,8 @@ export function fromFirestoreUser(snapshot: DocumentSnapshot<any>): UserType {
     phone: data.PHONE,
     role: data.ROLE,
     foto: data.FOTO,
+    lat: data.LAT,
+    lng: data.LNG,
+    area: data.AREA,
   };
 }

@@ -15,9 +15,17 @@ export async function POST(req: Request) {
     // 2. Add to Firestore
     const db = admin.firestore();
     await db.collection('users').doc(userRecord.uid).set({
-      ...userData,
-      email,
-      uid: userRecord.uid,
+      // ...userData,
+      // email,
+      // uid: userRecord.uid
+      ID: userRecord.uid,
+      EMAIL: email,
+      NAME: userData.name,
+      PHONE: userData.phone,
+      ROLE: userData.role,
+      LAT: userData.lat,
+      LNG: userData.lng,
+      AREA: userData.area,
     });
 
     return NextResponse.json({ success: true, uid: userRecord.uid });

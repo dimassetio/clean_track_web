@@ -24,7 +24,7 @@ export default function AddUserPage() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Failed to create user');
       router.push('/dashboard/users');
-      toast.success('User updated successfully!');
+      toast.success('User added successfully!');
     } catch (error: any) {
       console.error(error);
       toast.error(error?.message || 'Failed to update user.');
