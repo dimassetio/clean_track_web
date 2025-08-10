@@ -1,8 +1,9 @@
 import { addDoc, collection, deleteDoc, doc, getCountFromServer, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { auth, db, storage } from "./firebase";
 import { ReportType } from "@/types/report_type";
 import { UserType, fromFirestoreUser, toFirestoreUser } from "@/types/user_type";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 export async function getReportDetail(id: string) {
@@ -69,13 +70,41 @@ export async function updateUserDetail(id: string, data: UserType) {
   const docRef = doc(db, "users", id);
 
   try {
-    await setDoc(docRef, toFirestoreUser(data), { merge: true });
+    await updateDoc(docRef, toFirestoreUser(data));
     return true;
   } catch (error) {
     console.error("Error updating user:", error);
     return false;
   }
 }
+
+export async function updateProfile(id: string, data: any) {
+  const docRef = doc(db, "users", id);
+
+  try {
+    if (data.foto && data.foto instanceof File) {
+      // Upload foto ke Firebase Storage
+      const storageRef = ref(storage, `users/${id}/${data.foto.name}`);
+      await uploadBytes(storageRef, data.foto);
+
+      // Dapatkan URL download foto
+      const fotoUrl = await getDownloadURL(storageRef);
+
+      // Ganti data.foto dengan URL
+      data.FOTO = fotoUrl;
+
+    }
+    // Hapus properti foto yang masih berupa File agar tidak error saat updateDoc
+    delete data.foto;
+
+    await updateDoc(docRef, data);
+    return true;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return false;
+  }
+}
+
 
 export async function addUser(data: UserType) {
   try {

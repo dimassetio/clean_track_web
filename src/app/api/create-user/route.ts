@@ -26,6 +26,7 @@ export async function POST(req: Request) {
       LAT: userData.lat,
       LNG: userData.lng,
       AREA: userData.area,
+      IS_ACTIVE: true,
     });
 
     return NextResponse.json({ success: true, uid: userRecord.uid });

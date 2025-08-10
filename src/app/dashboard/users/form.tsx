@@ -30,6 +30,10 @@ const UserForm: React.FC<Props> = ({ initialData, onSubmit, isLoading }) => {
         ...initialData,
         password: '', // do not populate password on edit
       });
+      disableEmail = true;
+    } else {
+      disableEmail = false;
+
     }
   }, [initialData]);
 
@@ -55,6 +59,8 @@ const UserForm: React.FC<Props> = ({ initialData, onSubmit, isLoading }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  let disableEmail = false;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +92,7 @@ const UserForm: React.FC<Props> = ({ initialData, onSubmit, isLoading }) => {
         onChange={handleChange}
         placeholder="Email"
         className="w-full border px-3 py-2 rounded"
+        readOnly={disableEmail}
         required
       />
       <input
