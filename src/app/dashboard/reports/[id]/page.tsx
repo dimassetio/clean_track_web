@@ -1,19 +1,38 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FaArrowLeft, FaBroom, FaBrush, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaRegFileAlt, FaStickyNote, FaUserCircle } from "react-icons/fa";
+import { FaArrowLeft, FaBroom, FaBrush, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaRegFileAlt, FaStickyNote, FaUserCircle, FaUserEdit } from "react-icons/fa";
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { ReportType } from '@/types/report_type';
 import { getDurationString } from '@/helpers/formatter';
-import { fromFirestoreUser } from '@/types/user_type';
+import { UserType, fromFirestoreUser } from '@/types/user_type';
+import { getAllOfficer } from '@/lib/api';
+import { toast } from 'react-toastify';
+
 
 export default function ReportDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [report, setReport] = useState<ReportType | null>(null);
-
+  const [openChangeModal, setOpenChangeModal] = useState<boolean>(false);
+  const [officers, setOfficers] = useState<UserType[]>([]);
+  const getOfficers = async () => {
+    try {
+      // setLoading(true);
+      const response = await getAllOfficer();
+      console.log(response);
+      setOfficers(response);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // setLoading(false);
+    }
+  }
+  useEffect(() => {
+    getOfficers();
+  }, []);
   useEffect(() => {
     const fetchReport = async () => {
       const docRef = doc(db, 'reports', params.id);
@@ -38,6 +57,27 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
     };
     fetchReport();
   }, [params.id]);
+
+  const updateOfficer = async (selectedOfficer: UserType) => {
+    console.log("a");
+    if (!report) return;
+    console.log("b");
+    const reportRef = doc(db, "reports", report?.id!);
+    console.log("c");
+    setReport({
+      ...report,
+      officer: selectedOfficer,
+      officerId: selectedOfficer.id,
+      officerName: selectedOfficer.name,
+    });
+    await updateDoc(reportRef, {
+      OFFICER_ID: selectedOfficer.id,
+      OFFICER_NAME: selectedOfficer.name,
+      ASSIGNED_AT: new Date(),
+    });
+    console.log("d");
+    toast("Officer Updated Successfully!");
+  };
 
   if (!report) return <div className="p-4">Loading...</div>;
 
@@ -117,27 +157,39 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
             </div>
           </div>
           {report.officerId &&
-            <div className="bg-primary-1 shadow rounded-lg p-4 flex flex-col gap-4">
-              <div className="flex items-center gap-3 text-gray-700 font-semibold">
-                <FaBroom className="w-5 h-5 text-primary-3" />
-                <span>Assigned Cleaner</span>
+            <div className="bg-primary-1 shadow rounded-lg p-4 flex flex-col gap-4 relative">
+              {/* Header with action button */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-700 font-semibold">
+                  <FaBroom className="w-5 h-5 text-primary-3" />
+                  <span>Assigned Cleaner</span>
+                </div>
+                <button
+                  onClick={() => { setOpenChangeModal(true) }}
+                  disabled={!!report.startedAt}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium shadow
+                      ${report.startedAt
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-primary-3 text-white hover:bg-primary-2 active:scale-95 transition"}
+                  `}
+                >
+                  <FaUserEdit className="w-4 h-4" />
+                  Change
+                </button>
               </div>
+
+              {/* Cleaner Info */}
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-primary-1 flex items-center justify-center">
                   <FaUserCircle size={28} />
                 </div>
-                {/* <Image
-              src={'/avatar.png'}
-              alt="Avatar"
-              width={64}
-              height={64}
-              className="rounded-full object-cover"
-            /> */}
                 <div>
                   <p className="font-semibold text-lg">{report.officerName}</p>
                   <p className="text-gray-500 text-sm">{report.officer?.email}</p>
                 </div>
               </div>
+
+              {/* Assigned & Duration */}
               <div className="flex items-center gap-3 text-sm">
                 <FaCalendarAlt className="w-4 h-4 text-primary-3" />
                 <span className='text-gray-500'>
@@ -156,6 +208,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
                   </span>
                 }
               </div>
+
               {/* Officer's Note */}
               <div className="flex items-center gap-3 text-gray-700">
                 <FaStickyNote className="w-4 h-4 text-primary-3" />
@@ -173,7 +226,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
           {/* Reporter Photo with Overlay Label */}
           <div className="relative w-full h-60 rounded-lg overflow-hidden shadow">
             <Image
-              src={report.reporterPhoto || '/placeholder.jpg'}
+              src={report.reporterPhoto || '/logo.png'}
               alt="Reporter"
               fill
               className="object-cover"
@@ -231,6 +284,60 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
           )}
         </div>
       </div>
+
+      {/* Modal */}
+      {openChangeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Select Cleaner</h2>
+
+            {/* List of officers */}
+            <div className="flex flex-col gap-3 max-h-80 overflow-y-auto">
+              {officers.map((officer: any) => (
+                <div
+                  key={officer.id}
+                  className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-lg p-3 shadow-sm"
+                >
+                  {/* Leading: avatar */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary-1 flex items-center justify-center">
+                      <FaUserCircle size={24} className="text-gray-600" />
+                    </div>
+                    {/* Title + Subtitle */}
+                    <div>
+                      <p className="font-semibold text-gray-800">{officer.name}</p>
+                      <p className="text-gray-500 text-sm">{officer.area}</p>
+                    </div>
+                  </div>
+
+                  {/* Trailing: assign button */}
+                  <button
+                    onClick={async () => {
+                      // TODO: API untuk assign officer ke report
+                      await updateOfficer(officer);
+                      setOpenChangeModal(false);
+                    }}
+                    className="px-3 py-1.5 rounded-md text-sm font-medium bg-primary-3 text-white hover:bg-primary-2 active:scale-95 transition"
+                  >
+                    Assign
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setOpenChangeModal(false)}
+                className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

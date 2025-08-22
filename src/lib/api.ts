@@ -57,6 +57,15 @@ export async function getAllUsers() {
   return users;
 }
 
+export async function getAllOfficer() {
+  const userRef = collection(db, 'users');
+  const snapshot = await getDocs(query(userRef, where("ROLE", "==", "Officer")));
+
+  const users = snapshot.docs.map((doc) => fromFirestoreUser(doc));
+
+  return users;
+}
+
 export async function getUserDetail(id: string) {
   const docRef = doc(db, "users", id);
   const docSnap = await getDoc(docRef);
